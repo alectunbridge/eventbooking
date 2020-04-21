@@ -22,9 +22,10 @@ public class MySQLJdbcUtil {
         // System.out.println(mySQLJdbcUtil.getUser(1));
 //        System.out.println(mySQLJdbcUtil.deleteUser(1));
 //        System.out.println(mySQLJdbcUtil.updateUser(2, "Peter"));
-        mySQLJdbcUtil.createEvent("Java Meeting");
-        mySQLJdbcUtil.createEvent("Other Meeting");
-        System.out.println(mySQLJdbcUtil.getEvents());
+//        mySQLJdbcUtil.createEvent("Java Meeting");
+//        mySQLJdbcUtil.createEvent("Other Meeting");
+//        System.out.println(mySQLJdbcUtil.getEvents());
+        mySQLJdbcUtil.createBooking(2,1);
     }
 
     public void createUser(String userName) throws SQLException {
@@ -210,5 +211,20 @@ public class MySQLJdbcUtil {
 
         }
         return events;
+    }
+
+    public void createBooking(int userId, int eventId) throws SQLException {
+
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://db-workshop.public-dev.zuto.cloud:3306/bootcamp3?user=bootcamp3&password=TelephoneWeek")) {
+            conn.setAutoCommit(false);
+
+            String query = "insert into booking(user_id, event_id) values(?,?);";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setInt(1, userId);
+            statement.setInt(2, eventId);
+            statement.execute();
+            conn.commit();
+        }
     }
 }
