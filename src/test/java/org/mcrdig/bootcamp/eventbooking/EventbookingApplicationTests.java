@@ -8,6 +8,7 @@ class EventbookingApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// hello
 	}
 
 }
