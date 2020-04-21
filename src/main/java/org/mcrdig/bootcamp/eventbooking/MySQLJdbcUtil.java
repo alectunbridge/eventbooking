@@ -18,8 +18,10 @@ public class MySQLJdbcUtil {
 
         MySQLJdbcUtil mySQLJdbcUtil = new MySQLJdbcUtil();
         // mySQLJdbcUtil.createUser("Julie");
-        System.out.println( mySQLJdbcUtil.getUsers());
-        System.out.println(mySQLJdbcUtil.getUser(1));
+        // System.out.println( mySQLJdbcUtil.getUsers());
+        // System.out.println(mySQLJdbcUtil.getUser(1));
+//        System.out.println(mySQLJdbcUtil.deleteUser(1));
+        System.out.println(mySQLJdbcUtil.updateUser(2, "Peter"));
     }
 
     public void createUser(String userName) throws SQLException {
@@ -96,6 +98,76 @@ public class MySQLJdbcUtil {
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
         }
+        return user;
+    }
+
+    public User deleteUser(int id) {
+        User user = null;
+
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://db-workshop.public-dev.zuto.cloud:3306/bootcamp3?user=bootcamp3&password=TelephoneWeek"))
+        {
+            conn.setAutoCommit(false);
+
+            String query = "select * from user where id=?;";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                user = new User(resultSet.getInt("id"), resultSet.getString("name"));
+            }
+
+            if(user != null) {
+                String deleteQuery = "delete from user where id=?";
+                PreparedStatement deleteUserStatement = conn.prepareStatement(deleteQuery);
+                deleteUserStatement.setInt(1, id);
+                deleteUserStatement.executeUpdate();
+            }
+
+            conn.commit();
+        } catch (SQLException ex) {
+            // handle any errors
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        return user;
+    }
+
+    public User updateUser(int userId, String name) throws SQLException {
+        User user = null;
+
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://db-workshop.public-dev.zuto.cloud:3306/bootcamp3?user=bootcamp3&password=TelephoneWeek"))
+        {
+            conn.setAutoCommit(false);
+
+            String query = "update user set name=? where id=?";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, name);
+            statement.setInt(2, userId);
+            int row = statement.executeUpdate();
+
+            if(row == 0) {
+                return user;
+
+            }
+
+            String selectQuery = "select * from user where id=?";
+            PreparedStatement selectStatement = conn.prepareStatement(selectQuery);
+            selectStatement.setInt(1, userId);
+            ResultSet resultSet = selectStatement.executeQuery();
+            while (resultSet.next()) {
+                user = new User(resultSet.getInt("id"), resultSet.getString("name"));
+            }
+
+            conn.commit();
+        }
+            // handle any errors
+//            System.out.println("SQLException: " + ex.getMessage());
+//            System.out.println("SQLState: " + ex.getSQLState());
+//            System.out.println("VendorError: " + ex.getErrorCode());
+
         return user;
     }
 }
