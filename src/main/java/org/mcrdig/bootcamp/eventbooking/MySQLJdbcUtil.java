@@ -19,6 +19,7 @@ public class MySQLJdbcUtil {
         MySQLJdbcUtil mySQLJdbcUtil = new MySQLJdbcUtil();
         // mySQLJdbcUtil.createUser("Julie");
         System.out.println( mySQLJdbcUtil.getUsers());
+        System.out.println(mySQLJdbcUtil.getUser(1));
     }
 
     public void createUser(String userName) throws SQLException {
@@ -71,5 +72,30 @@ public class MySQLJdbcUtil {
         }
 
         return users;
+    }
+
+    public User getUser(int id) throws SQLException {
+
+        User user = null;
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://db-workshop.public-dev.zuto.cloud:3306/bootcamp3?user=bootcamp3&password=TelephoneWeek"))
+        {
+            conn.setAutoCommit(false);
+
+            String query = "select * from user where id=?;";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                user = new User(resultSet.getInt("id"), resultSet.getString("name"));
+            }
+            conn.commit();
+        } catch (SQLException ex) {
+            // handle any errors
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        return user;
     }
 }
