@@ -21,7 +21,10 @@ public class MySQLJdbcUtil {
         // System.out.println( mySQLJdbcUtil.getUsers());
         // System.out.println(mySQLJdbcUtil.getUser(1));
 //        System.out.println(mySQLJdbcUtil.deleteUser(1));
-        System.out.println(mySQLJdbcUtil.updateUser(2, "Peter"));
+//        System.out.println(mySQLJdbcUtil.updateUser(2, "Peter"));
+        mySQLJdbcUtil.createEvent("Java Meeting");
+        mySQLJdbcUtil.createEvent("Other Meeting");
+        System.out.println(mySQLJdbcUtil.getEvents());
     }
 
     public void createUser(String userName) throws SQLException {
@@ -169,5 +172,43 @@ public class MySQLJdbcUtil {
 //            System.out.println("VendorError: " + ex.getErrorCode());
 
         return user;
+    }
+
+    public void createEvent(String title) throws SQLException {
+
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://db-workshop.public-dev.zuto.cloud:3306/bootcamp3?user=bootcamp3&password=TelephoneWeek")) {
+            conn.setAutoCommit(false);
+
+            String query = "insert into event(title) value(?);";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, title);
+            statement.execute();
+            conn.commit();
+        }
+    }
+
+    public List<Event> getEvents() throws SQLException {
+
+        List<Event> events = new ArrayList<>();
+
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://db-workshop.public-dev.zuto.cloud:3306/bootcamp3?user=bootcamp3&password=TelephoneWeek"))
+        {
+            conn.setAutoCommit(false);
+
+            String query = "select * from event ";
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+
+            while (resultSet.next()) {
+                Event event = new Event(resultSet.getInt("id"), resultSet.getString("title"));
+                events.add(event);
+            }
+
+            conn.commit();
+
+        }
+        return events;
     }
 }
